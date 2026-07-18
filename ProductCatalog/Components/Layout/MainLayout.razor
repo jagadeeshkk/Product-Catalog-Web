@@ -1,10 +1,11 @@
-﻿@inherits LayoutComponentBase
+﻿@inject NavigationManager Nav
+@inherits LayoutComponentBase
+@implements IDisposable
 <div class="page">
     @* Meijer Blue Header Layout *@
-    <div class="row text-white p-3 mb-4 rounded shadow-sm" style="background-color: #0c60a5;">
-		<div class="col-12 text-center">
-			<img src="~/meijerlogo-primary-fullcolor.svg" />
-            <h2 class="m-0 font-weight-bold">Product Web App</h2>
+    <div class="row text-white p-3 mb-4 rounded shadow-sm align-items-center" style="background-color: #0c60a5;">
+        <div class="col-12 text-center position-relative">
+            <h2 class="m-0 font-weight-bold">@PageTitle</h2>
         </div>
     </div>
     <main>
@@ -14,3 +15,45 @@
     </main>
 </div>
 
+@code {
+	private string PageTitle { get; set; } = "Product Web App";
+	protected override void OnInitialized()
+	{
+		// Set the title on initial page load
+		UpdateTitle(Nav.Uri);
+		Nav.LocationChanged += OnLocationChanged;
+	}
+
+	private void OnLocationChanged(object? sender, Microsoft.AspNetCore.Components.Routing.LocationChangedEventArgs e)
+	{
+		UpdateTitle(e.Location);
+		StateHasChanged(); // Force the layout UI to refresh the text
+	}
+
+	private void UpdateTitle(string url)
+	{
+		// Extract the trailing page route segment from the full URL string
+		var absoluteUri = new Uri(url);
+		var pageRoute = absoluteUri.AbsolutePath.Trim('/');
+
+		// Determine your header text based on the URL route path
+		if (string.IsNullOrEmpty(pageRoute))
+		{
+			PageTitle = "Product Web App";
+		}
+		else if (pageRoute.StartsWith("ProductInfo", StringComparison.OrdinalIgnoreCase))
+		{
+			PageTitle = "Product Details";
+		}
+		else
+		{
+			PageTitle = System.Globalization.CultureInfo.CurrentCulture.TextInfo.ToTitleCase(pageRoute);
+		}
+	}
+
+	public void Dispose()
+	{
+		// Unsubscribe to protect runtime memory performance
+		Nav.LocationChanged -= OnLocationChanged;
+	}
+}

@@ -2,20 +2,12 @@
 @rendermode InteractiveServer
 @inject NavigationManager NavigationManager
 @inject IProductApiService ProductApiService
-@using ProductCatalog.Data.IService
+@inject IShareMessageBuilder ShareMessageBuilder
+@inject IAddedItemsService AddedItemsService
+@using ProductCatalog.Web.Data.IService
 @using ProductCatalog.Web.Utility.Model
 
 @* Meijer Blue Header Layout *@
-<div class="row text-white p-3 mb-4 rounded shadow-sm" style="background-color: #0c60a5;">
-    <div class="col-12 d-flex align-items-center justify-content-between">
-        <button class="btn btn-outline-light btn-sm" @onclick="GoBack">
-            <i class="bi bi-arrow-left"></i> Back to Catalog
-        </button>
-        <h2 class="m-0 font-weight-bold mx-auto">Product Detail</h2>
-        <div style="width: 125px;"></div> @* Balance the back button spacer *@
-    </div>
-</div>
-
 <div class="row justify-content-center">
     <div class="col-md-8">
         @if (isLoading)
@@ -35,9 +27,7 @@
         }
         else
         {
-            @* Product Card Container matching wireframe *@
             <div class="card shadow border-0 overflow-hidden">
-                @* Full Image Box Placeholder *@
                 <div class="bg-light text-center border-bottom position-relative" style="min-height: 350px; max-height: 500px;">
                     @if (!string.IsNullOrEmpty(productDetail.ImageUrl))
                     {
@@ -52,8 +42,8 @@
                     }
                 </div>
 
-                @* Description and details field metadata mapping *@
                 <div class="card-body p-4">
+                    
                     <h3 class="card-title text-dark font-weight-bold mb-3">
                         <span class="text-muted small d-block text-uppercase font-weight-normal mb-1">Title</span>
                         @productDetail.Title
@@ -62,7 +52,7 @@
                     <div class="mb-4">
                         <span class="text-muted small d-block text-uppercase mb-1">Description</span>
                         <p class="card-text text-secondary lh-base" style="white-space: pre-line;">
-                            @(string.IsNullOrEmpty(productDetail.Summary) ? "No detailed description available." : productDetail.Summary)
+                            @(string.IsNullOrEmpty(productDetail.Description) ? productDetail.Summary : productDetail.Description)
                         </p>
                     </div>
 
@@ -71,15 +61,46 @@
                         <h2 class="text-success font-weight-bold m-0">@productDetail.Price</h2>
                     </div>
 
-                    @* Bottom action interactive triggers bar *@
-                    <div class="d-flex flex-wrap gap-3 pt-3 border-top">
-                        <button class="btn btn-primary d-inline-flex align-items-center px-4 py-2" @onclick="AddToList" style="background-color: #0c60a5; border-color: #0c60a5;">
-                            <i class="bi bi-plus-lg me-2"></i> Add to List
-                        </button>
-                        <button class="btn btn-outline-secondary d-inline-flex align-items-center px-4 py-2" @onclick="ShareProduct">
-                            <i class="bi bi-share me-2"></i> Share
-                        </button>
-                    </div>
+                    @if (!showCityPrompt)
+                    {
+                        <div class="d-flex flex-wrap align-items-center gap-3 pt-3 border-top">
+                            <button class="btn btn-primary d-inline-flex align-items-center px-4 py-2" @onclick="StartAddToList" style="background-color: #0c60a5; border-color: #0c60a5;">
+                                <i class="bi bi-plus-lg me-2"></i> Add to List
+                            </button>
+
+                            <button class="btn btn-primary d-inline-flex align-items-center px-4 py-2" style="background-color: #0c60a5; border-color: #0c60a5;" @onclick="GoBack">
+                                <i class="bi bi-plus-lg me-2"></i> Back to Catalog
+                            </button>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="pt-3 border-top">
+                            <label for="cityInput" class="font-weight-bold text-muted small mb-2 text-uppercase d-block">
+                                What city should we list you as being in?
+                            </label>
+                            <div class="input-group" style="max-width: 420px;">
+                                <input id="cityInput" class="form-control" placeholder="e.g. Chicago" @bind="cityInput" @bind:event="oninput" @onkeyup="OnCityInputKeyUp" />
+                                <button class="btn btn-primary" style="background-color: #0c60a5; border-color: #0c60a5;" @onclick="ConfirmAddToList" disabled="@(string.IsNullOrWhiteSpace(cityInput))">
+                                    Confirm
+                                </button>
+                                <button class="btn text-white" style="background-color: #0c60a5; border-color: #0c60a5;" @onclick="CancelAddToList">
+                                    Cancel
+                                </button>
+                            </div>
+                            @if (!string.IsNullOrEmpty(cityValidationError))
+                            {
+                                <div class="text-danger small mt-2">@cityValidationError</div>
+                            }
+                        </div>
+                    }
+
+                    @if (!string.IsNullOrEmpty(statusMessage))
+                    {
+                        <div class="alert @statusCssClass mt-3 mb-0 py-2 small" role="status">
+                            @statusMessage
+                        </div>
+                    }
                 </div>
             </div>
         }
@@ -102,22 +123,32 @@
 </style>
 
 @code {
-	[Parameter]
-	public int Id { get; set; }
+    [Parameter]
+    public int Id { get; set; }
 
-    private ProductDetail productDetail;
-	private bool isLoading = true;
+    private ProductDetail? productDetail;
+    private bool isLoading = true;
 
-	protected override async Task OnParametersSetAsync()
-	{
-		try
-		{
-			isLoading = true;
-            productDetail = await ProductApiService.GetProductDetailsAsync(Id);
-		}
-        catch (Exception ex)
+    private bool showCityPrompt;
+    private string cityInput = string.Empty;
+    private string? cityValidationError;
+
+    private string? lastShareMessage;
+    private string? statusMessage;
+    private string statusCssClass = "alert-success";
+    private bool showMailtoFallback;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        try
         {
-            // Log exception context structure appropriately if required
+            isLoading = true;
+            statusMessage = null;
+            showCityPrompt = false;
+            productDetail = await ProductApiService.GetProductDetailsAsync(Id);
+        }
+        catch (Exception)
+        {
             productDetail = null;
         }
         finally
@@ -131,15 +162,58 @@
         NavigationManager.NavigateTo("/");
     }
 
-    private void AddToList()
+    private void StartAddToList()
     {
-        // To do: wire up list item handling context logic
-        Console.WriteLine($"Product {productDetail?.Id} added to list.");
+        showCityPrompt = true;
+        cityValidationError = null;
+        statusMessage = null;
+        showMailtoFallback = false;
     }
 
-    private void ShareProduct()
+    private void CancelAddToList()
     {
-        // To do: wire up native browser share api layout handlers
-        Console.WriteLine($"Product {productDetail?.Id} shared tracking event triggered.");
+        showCityPrompt = false;
+        cityInput = string.Empty;
+        cityValidationError = null;
+    }
+
+    private async Task OnCityInputKeyUp(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter" && !string.IsNullOrWhiteSpace(cityInput))
+        {
+            await ConfirmAddToList();
+        }
+    }
+
+    private async Task ConfirmAddToList()
+    {
+        if (productDetail is null)
+        {
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(cityInput))
+        {
+            cityValidationError = "Please enter a city.";
+            return;
+        }
+
+        cityValidationError = null;
+
+        var message = ShareMessageBuilder.BuildAddToListMessage(productDetail.Title, productDetail.Price, cityInput);
+
+        AddedItemsService.Add(new AddedListItem
+        {
+            ProductId = productDetail.Id,
+            Title = productDetail.Title,
+            City = cityInput.Trim(),
+            ShareMessage = message
+        });
+
+        lastShareMessage = message;
+        showCityPrompt = false;
+        statusMessage = $"Added to list: \"{message}\"";
+        statusCssClass = "alert-info";
+        showMailtoFallback = true;
     }
 }
