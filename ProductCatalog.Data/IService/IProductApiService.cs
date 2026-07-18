@@ -1,9 +1,6 @@
 ﻿using ProductCatalog.Web.Utility.Model;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
-namespace ProductCatalog.Data.IService
+namespace ProductCatalog.Web.Data.IService
 {
     public interface IProductApiService
     {
