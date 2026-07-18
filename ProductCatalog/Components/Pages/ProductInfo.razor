@@ -1,0 +1,145 @@
+﻿@page "/ProductInfo/{Id:int}"
+@rendermode InteractiveServer
+@inject NavigationManager NavigationManager
+@inject IProductApiService ProductApiService
+@using ProductCatalog.Data.IService
+@using ProductCatalog.Web.Utility.Model
+
+@* Meijer Blue Header Layout *@
+<div class="row text-white p-3 mb-4 rounded shadow-sm" style="background-color: #0c60a5;">
+    <div class="col-12 d-flex align-items-center justify-content-between">
+        <button class="btn btn-outline-light btn-sm" @onclick="GoBack">
+            <i class="bi bi-arrow-left"></i> Back to Catalog
+        </button>
+        <h2 class="m-0 font-weight-bold mx-auto">Product Detail</h2>
+        <div style="width: 125px;"></div> @* Balance the back button spacer *@
+    </div>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        @if (isLoading)
+        {
+            <div class="text-center py-5">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading product details...</span>
+                </div>
+            </div>
+        }
+        else if (productDetail == null)
+        {
+            <div class="alert alert-warning text-center shadow-sm" role="alert">
+                <i class="bi bi-exclamation-triangle-fill fs-4 d-block mb-2"></i>
+                Product details could not be found or loaded.
+            </div>
+        }
+        else
+        {
+            @* Product Card Container matching wireframe *@
+            <div class="card shadow border-0 overflow-hidden">
+                @* Full Image Box Placeholder *@
+                <div class="bg-light text-center border-bottom position-relative" style="min-height: 350px; max-height: 500px;">
+                    @if (!string.IsNullOrEmpty(productDetail.ImageUrl))
+                    {
+                        <img src="@productDetail.ImageUrl" class="img-fluid w-100 h-100 object-fit-contain p-2" alt="@productDetail.Title" style="max-height: 500px;" />
+                    }
+                    else
+                    {
+                        <div class="d-flex flex-column align-items-center justify-content-center h-100 py-5 text-muted">
+                            <i class="bi bi-image" style="font-size: 5rem;"></i>
+                            <span class="mt-2 font-weight-bold">Full Image Placeholder</span>
+                        </div>
+                    }
+                </div>
+
+                @* Description and details field metadata mapping *@
+                <div class="card-body p-4">
+                    <h3 class="card-title text-dark font-weight-bold mb-3">
+                        <span class="text-muted small d-block text-uppercase font-weight-normal mb-1">Title</span>
+                        @productDetail.Title
+                    </h3>
+
+                    <div class="mb-4">
+                        <span class="text-muted small d-block text-uppercase mb-1">Description</span>
+                        <p class="card-text text-secondary lh-base" style="white-space: pre-line;">
+                            @(string.IsNullOrEmpty(productDetail.Summary) ? "No detailed description available." : productDetail.Summary)
+                        </p>
+                    </div>
+
+                    <div class="mb-4">
+                        <span class="text-muted small d-block text-uppercase mb-1">Price</span>
+                        <h2 class="text-success font-weight-bold m-0">@productDetail.Price</h2>
+                    </div>
+
+                    @* Bottom action interactive triggers bar *@
+                    <div class="d-flex flex-wrap gap-3 pt-3 border-top">
+                        <button class="btn btn-primary d-inline-flex align-items-center px-4 py-2" @onclick="AddToList" style="background-color: #0c60a5; border-color: #0c60a5;">
+                            <i class="bi bi-plus-lg me-2"></i> Add to List
+                        </button>
+                        <button class="btn btn-outline-secondary d-inline-flex align-items-center px-4 py-2" @onclick="ShareProduct">
+                            <i class="bi bi-share me-2"></i> Share
+                        </button>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@* Embedded Custom Utilities Constraints *@
+<style>
+    .object-fit-contain {
+        object-fit: contain;
+    }
+
+    .font-weight-bold {
+        font-weight: 700;
+    }
+
+    .font-weight-normal {
+        font-weight: 400;
+    }
+</style>
+
+@code {
+	[Parameter]
+	public int Id { get; set; }
+
+    private ProductDetail productDetail;
+	private bool isLoading = true;
+
+	protected override async Task OnParametersSetAsync()
+	{
+		try
+		{
+			isLoading = true;
+            productDetail = await ProductApiService.GetProductDetailsAsync(Id);
+		}
+        catch (Exception ex)
+        {
+            // Log exception context structure appropriately if required
+            productDetail = null;
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private void GoBack()
+    {
+        NavigationManager.NavigateTo("/");
+    }
+
+    private void AddToList()
+    {
+        // To do: wire up list item handling context logic
+        Console.WriteLine($"Product {productDetail?.Id} added to list.");
+    }
+
+    private void ShareProduct()
+    {
+        // To do: wire up native browser share api layout handlers
+        Console.WriteLine($"Product {productDetail?.Id} shared tracking event triggered.");
+    }
+}

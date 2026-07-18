@@ -1,0 +1,169 @@
+﻿@page "/"
+@inject IProductApiService ProductApiService
+@inject NavigationManager NavigationManager
+@using ProductCatalog.Data.IService
+@using ProductCatalog.Web.Utility.Model
+
+
+
+@* Metrics Summary Cards Layout *@
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="card text-center shadow border-0 bg-light">
+            <div class="card-body py-3">
+                <h6 class="text-uppercase text-muted small mb-1">Total</h6>
+                <h3 class="m-0 text-dark font-weight-bold">@metrics.TotalProducts</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center shadow border-0 bg-light">
+            <div class="card-body py-3">
+                <h6 class="text-uppercase text-muted small mb-1">Avg</h6>
+                <h3 class="m-0 text-dark font-weight-bold">
+                   $@metrics.AveragePrice
+                </h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center shadow border-0 bg-light">
+            <div class="card-body py-3">
+                <h6 class="text-uppercase text-muted small mb-1">Max</h6>
+                <h3 class="m-0 text-dark font-weight-bold text-truncate" title="@GetMaxPriceProductTitle()">
+                    @GetMaxPriceProductTitle()
+                </h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center shadow border-0 bg-light">
+            <div class="card-body py-3">
+                <h6 class="text-uppercase text-muted small mb-1">Min</h6>
+                <h3 class="m-0 text-dark font-weight-bold text-truncate" title="@GetMinPriceProductTitle()">
+                    @GetMinPriceProductTitle()
+                </h3>
+            </div>
+        </div>
+    </div>
+</div>
+
+@* Split Dashboard Area: Bar Chart Left, Search & Filter Right *@
+<div class="row align-items-start mb-4">
+    @* Price-Unit Bar Chart Visual Placeholder *@
+    <div class="col-md-6 mb-3 mb-md-0">
+        <div class="card shadow border-0 h-100">
+            <div class="card-body d-flex flex-column align-items-center justify-content-center bg-white rounded p-4" style="min-height: 160px; border: 2px dashed #dee2e6;">
+                <i class="bi bi-bar-chart-fill text-muted mb-2" style="font-size: 2rem;"></i>
+                <span class="text-muted font-weight-bold">Price-unit bar chart</span>
+                <small class="text-muted text-center mt-1">Visualization space reserved</small>
+            </div>
+        </div>
+    </div>
+
+    @* Right Column Search Input Control *@
+    <div class="col-md-6">
+        <div class="card shadow border-0 p-3 bg-light">
+            <div class="form-group m-0">
+                <label for="productSearch" class="font-weight-bold text-muted small mb-2 text-uppercase">Search Dashboard</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
+                    <input id="productSearch" class="form-control border-start-0 ps-0" placeholder="Search product title..." @bind="searchText" @bind:event="oninput" />
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@* Product Catalog Grid Items Layout *@
+<div class="row g-4">
+    @if (filteredProducts.Any())
+    {
+        @foreach (var product in filteredProducts)
+        {
+            <div class="col-md-4 col-sm-6">
+                <div class="card shadow-sm h-100 border-0 product-card custom-hover" @onclick="() => openProduct(product.Id)" style="cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;">
+                    <div class="position-relative overflow-hidden bg-light text-center" style="height: 200px;">
+                        @if (!string.IsNullOrEmpty(product.ImageUrl))
+                        {
+                            <img src="@product.ImageUrl" class="w-100 h-100 object-fit-cover" alt="@product.Title">
+                        }
+                        else
+                        {
+                            <div class="d-flex align-items-center justify-content-center h-100 text-muted">
+                                <i class="bi bi-image" style="font-size: 3rem;"></i>
+                            </div>
+                        }
+                        <span class="position-absolute bottom-0 end-0 bg-dark text-white px-2 py-1 m-2 rounded font-weight-bold badge">
+                            @product.Title
+                        </span>
+                    </div>
+                    <div class="card-body d-flex flex-column justify-content-between">
+                        <div>
+                            <h5 class="card-title text-dark font-weight-bold text-truncate mb-2">@product.Title</h5>
+                            <p class="card-text text-muted small line-clamp-3">@product.Summary</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    }
+    else
+    {
+        <div class="col-12 text-center py-5">
+            <i class="bi bi-box-seam text-muted" style="font-size: 3rem;"></i>
+            <p class="text-muted mt-2">No matching products found in the catalog.</p>
+        </div>
+    }
+</div>
+
+@* Embedded Custom Style Rule Constraints *@
+<style>
+    .custom-hover:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 .5rem 1rem rgba(0,0,0,.15)!important;
+    }
+    .line-clamp-3 {
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+    .object-fit-cover {
+        object-fit: cover;
+    }
+</style>
+
+@code {
+    private List<Product> products = new();
+    private Metrics metrics = new();
+    private string searchText = "";
+
+    private IEnumerable<Product> filteredProducts => products.Where(p =>
+        !string.IsNullOrEmpty(p.Title) && p.Title.Contains(searchText, StringComparison.OrdinalIgnoreCase));
+
+    protected override async Task OnInitializedAsync()
+    {
+        products = await ProductApiService.GetProductAsync() ?? new List<Product>();
+        metrics = await ProductApiService.GetProductMetricsAsync() ?? new Metrics();
+    }
+
+    private void openProduct(int id)
+    {
+        NavigationManager.NavigateTo($"/ProductInfo/{id}");
+    }
+
+    private string GetMaxPriceProductTitle()
+    {
+        if (products == null || !products.Any()) return "N/A";
+        var maxProduct = metrics.MostExpensiveProduct.Price;
+        return maxProduct != null ? metrics.MostExpensiveProduct.Title : "N/A";
+    }
+
+    private string GetMinPriceProductTitle()
+    {
+        if (products == null || !products.Any()) return "N/A";
+        var minProduct = metrics.LeastExpensiveProduct.Price;
+        return minProduct != null ? metrics.LeastExpensiveProduct.Title : "N/A";
+    }
+}

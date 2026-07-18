@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="ProductCatalog.Data/ProductCatalog.Web.Data.csproj" />
+  <Project Path="ProductCatalog.Web.Utility/ProductCatalog.Web.Utility.csproj" />
+  <Project Path="ProductCatalog/ProductCatalog.Web.csproj" />
+</Solution>
