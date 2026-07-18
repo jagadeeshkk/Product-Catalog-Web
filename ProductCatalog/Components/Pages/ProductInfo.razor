@@ -101,6 +101,14 @@
                             @statusMessage
                         </div>
                     }
+                    @if (showMailtoFallback && !string.IsNullOrEmpty(lastShareMessage))
+                    {
+                        <div class="mt-2">
+                            <a class="small" href="@BuildMailtoLink()">
+                                <i class="bi bi-envelope me-1"></i> Or send it by email instead
+                            </a>
+                        </div>
+                    }
                 </div>
             </div>
         }
@@ -215,5 +223,11 @@
         statusMessage = $"Added to list: \"{message}\"";
         statusCssClass = "alert-info";
         showMailtoFallback = true;
+    }
+    private string BuildMailtoLink()
+    {
+        var body = Uri.EscapeDataString(lastShareMessage ?? string.Empty);
+        var subject = Uri.EscapeDataString("Product I added to my list");
+        return $"mailto:?subject={subject}&body={body}";
     }
 }
