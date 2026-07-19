@@ -2,7 +2,7 @@
 @inject IProductApiService ProductApiService
 @inject IProductFilterService ProductFilterService
 @inject NavigationManager NavigationManager
-@using ProductCatalog.Web.Data.IService
+@using ProductCatalog.Web.Business.IService
 @using ProductCatalog.Web.Utility.Model
 
 
@@ -97,7 +97,7 @@
 </div>
 
 @* Product Catalog Grid Items Layout *@
-<div class="row g-4">
+<div class="row g-4 product-list-scroll">
     @if (filteredProducts.Any())
     {
         @foreach (var product in filteredProducts)

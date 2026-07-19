@@ -1,10 +1,10 @@
-﻿using ProductCatalog.Web.Data.IService;
+﻿using ProductCatalog.Web.Business.IService;
 using ProductCatalog.Web.Utility.Model;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace ProductCatalog.Web.Data.Service
+namespace ProductCatalog.Web.Business.Service
 {
     public class ProductFilterService : IProductFilterService
     {

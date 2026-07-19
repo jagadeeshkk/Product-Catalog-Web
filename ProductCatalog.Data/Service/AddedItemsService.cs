@@ -1,7 +1,7 @@
-﻿using ProductCatalog.Web.Data.IService;
+﻿using ProductCatalog.Web.Business.IService;
 using ProductCatalog.Web.Utility.Model;
 
-namespace ProductCatalog.Web.Data.Service
+namespace ProductCatalog.Web.Business.Service
 {
     public class AddedItemsService : IAddedItemsService
     {

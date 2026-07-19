@@ -73,3 +73,14 @@ h1:focus {
         transform: translateY(-3px);
         transition: .2s;
  }
+html, body {
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    overflow-x: hidden;
+}
+
+.product-list-scroll {
+    max-height: 65vh;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding-right: 0.5rem;
+}

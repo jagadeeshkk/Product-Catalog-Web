@@ -1,6 +1,6 @@
 ﻿using ProductCatalog.Web.Utility.Model;
 
-namespace ProductCatalog.Web.Data.IService
+namespace ProductCatalog.Web.Business.IService
 {
     public interface IProductApiService
     {
