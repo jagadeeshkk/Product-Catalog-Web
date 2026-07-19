@@ -1,7 +1,7 @@
-using ProductCatalog.Web.Data.IService;
+using ProductCatalog.Web.Business.IService;
 using ProductCatalog.Data.Service;
 using ProductCatalog.Web.Components;
-using ProductCatalog.Web.Data.Service;
+using ProductCatalog.Web.Business.Service;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Logging.AddJsonConsole(options =>

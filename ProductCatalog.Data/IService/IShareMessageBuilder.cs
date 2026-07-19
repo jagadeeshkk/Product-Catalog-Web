@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace ProductCatalog.Web.Data.IService
+namespace ProductCatalog.Web.Business.IService
 {
     public interface IShareMessageBuilder
     {
