@@ -1,5 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
-using ProductCatalog.Web.Data.IService;
+using ProductCatalog.Web.Business.IService;
 using ProductCatalog.Web.Utility.Model;
 using System;
 using System.Collections.Generic;

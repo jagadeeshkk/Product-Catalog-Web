@@ -1,4 +1,4 @@
-﻿using ProductCatalog.Web.Data.Service;
+﻿using ProductCatalog.Web.Business.Service;
 using ProductCatalog.Web.Utility.Model;
 using System;
 using System.Collections.Generic;
