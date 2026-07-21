@@ -19,7 +19,7 @@ namespace ProductCatalog.Web.Business.Service
 
         public async Task<List<Product>> GetProductAsync()
         {
-            const string requestUri = "api/v1/products";
+            const string requestUri = "api/v1/Products";
             try
             {
                 var response = await _httpClient.GetAsync(requestUri);
@@ -48,7 +48,7 @@ namespace ProductCatalog.Web.Business.Service
                 throw new ArgumentOutOfRangeException(nameof(id), "Product id cannot be negative.");
             }
 
-            var requestUri = $"api/v1/products/{id}";
+            var requestUri = $"api/v1/Products/{id}";
             try
             {
                 var response = await _httpClient.GetAsync(requestUri);
@@ -76,7 +76,7 @@ namespace ProductCatalog.Web.Business.Service
         }
         public async Task<Metrics?> GetProductMetricsAsync()
         {
-            const string requestUri = "api/v1/products/metrics";
+            const string requestUri = "api/v1/Products/metrics";
             try
             {
                 var response = await _httpClient.GetAsync(requestUri);
