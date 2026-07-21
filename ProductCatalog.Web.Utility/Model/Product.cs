@@ -8,8 +8,6 @@ namespace ProductCatalog.Web.Utility.Model
     [ExcludeFromCodeCoverage]
     public class Product
     {
-        [Key]
-        [DatabaseGenerated(DatabaseGeneratedOption.None)]
         [JsonPropertyName("id")]
         public int Id { get; set; }
         [JsonPropertyName("title")]
@@ -24,8 +22,6 @@ namespace ProductCatalog.Web.Utility.Model
     {
         [JsonPropertyName("description")]
         public string Description { get; set; } = string.Empty;
-        [Key]
-        [DatabaseGenerated(DatabaseGeneratedOption.None)]
         [JsonPropertyName("id")]
         public int Id { get; set; }
         [JsonPropertyName("imageUrl")]
