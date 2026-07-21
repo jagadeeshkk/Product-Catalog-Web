@@ -1,7 +1,4 @@
 ﻿using ProductCatalog.Web.Business.IService;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace ProductCatalog.Web.Business.Service
 {
