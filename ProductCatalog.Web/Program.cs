@@ -1,5 +1,4 @@
 using ProductCatalog.Web.Business.IService;
-using ProductCatalog.Data.Service;
 using ProductCatalog.Web.Components;
 using ProductCatalog.Web.Business.Service;
 

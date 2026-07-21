@@ -1,13 +1,10 @@
 ﻿using Microsoft.Extensions.Logging;
 using ProductCatalog.Web.Business.IService;
 using ProductCatalog.Web.Utility.Model;
-using System;
-using System.Collections.Generic;
 using System.Net;
 using System.Net.Http.Json;
-using System.Text;
 
-namespace ProductCatalog.Data.Service
+namespace ProductCatalog.Web.Business.Service
 {
     public class ProductApiService: IProductApiService
     {

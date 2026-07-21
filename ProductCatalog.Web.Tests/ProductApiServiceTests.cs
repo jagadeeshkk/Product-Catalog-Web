@@ -1,11 +1,7 @@
 ﻿using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using Moq.Protected;
-using ProductCatalog.Data.Service;
-using System;
-using System.Collections.Generic;
 using System.Net;
-using System.Text;
 
 namespace ProductCatalog.Web.Tests
 {
